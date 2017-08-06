@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Cloud9er</title>
+		<style type="text/css">
+			body {
+				background-color: #ACF;
+				color: #FFF;
+				
+			}
+			
+			#dh1 {
+				margin: 3px;
+				font-size: 2em;
+				font-weight: bold;
+			}
+			
+			h2 {
+				margin: 3px;
+			}
+			
+			#wrapper {
+				width: 350px;
+				overflow: auto;
+			}
+			
+			#popup {
+				position: absolute;
+				width: 200px;
+				height: 75px
+				border: #CCC 1px solid;
+				border-radius: 25px;
+				box-shadow: 15px 15px 15px #8AC;
+				color: #ACF;
+				display: none;
+				vertical-align: middle;
+				text-align: center;
+				background-color: #FFF;
+				text-shadow: none;
+				font-size: 2em;
+			}
+			
+			#popup img {
+				height: 125px;
+			}
+			
+			#popup p {
+				font-size: 0.5em;
+			}
+			
+			#wrapper .maindiv {
+				overflow: auto;
+				border-top: 1px #FFF solid;
+				margin-top: 10px;
+				padding-top: 10px;
+			}
+			
+			.links {
+				display: inline-block;
+				background-color: #FFF;
+				color: #444;
+				border: #CCC 1px solid;
+				border-radius: 25px;
+				width: 80px; 
+				font-size: 24px;
+				text-align: center;
+				vertical-align: middle;
+				padding: 10px;
+				margin: 5px;
+				text-decoration: none;
+				box-shadow: 3px 3px 3px #8AC;
+				text-shadow: none;
+			}
+			
+			.rgblinks {
+				display: inline-block;
+				background-color: #FFF;
+				color: #444;
+				border: #FFF 0px solid;
+				border-radius: 25px;
+				width: 315px; 
+				padding: 10px;
+				margin: 5px;
+				box-shadow: 3px 3px 3px #8AC;
+				text-shadow: none;
+				font-size: 24px;
+			}
+			
+			#rgbranges {
+				line-height: 1.5em;
+			}
+			
+			.rgblinks div {
+				display: block;
+				float: left;
+				margin: 0 0 0 15px;
+				padding: 0;
+				text-align: center;
+				height: 100%;
+			}
+			
+			#colorpicker {
+				width: 60px;
+				height: 34px;
+				margin: 0;
+				padding: 5px 20px;
+				border-radius: 25px;
+				box-shadow: 3px 3px 3px #8AC;
+				background-color: #FFF;
+			}
+			
+			.offbutt {
+				background-color: #F00;
+				color: #FFF;
+				float: left;
+			}
+			
+			.blocked {
+				color: #CCC;
+				box-shadow: none;
+				pointer-events: none;
+				cursor: default;
+			}
+			
+			#id {
+				display: inline;
+			}
+			.selected {
+				background-color: #0F0;
+			}
+			
+		</style>
+		<script type="text/javascript">
+			//var connection = new WebSocket('ws://192.168.1.135:8888/socket/');
+			var connection = new WebSocket('ws://cwicsite.com:8888/socket/');
+			connection.onopen = function () {  
+				connection.send('Connected');
+			};
+			
+			connection.onerror = function (error) {
+				console.log('WebSocket Error ', error);
+			};
+			
+			connection.onmessage = function (e) {
+				console.log('Server: ', e.data);
+							
+				//document.getElementById("status").innerHTML = e.data;
+				
+				//JsonObject& root = jsonBuffer.parseObject(e.data);
+				//if (!root.success()) {
+				//	Serial.println("parseObject() failed");
+				//	return;
+				//}	
+				// const char* lightState = root["light"];
+				// const char* soundState = root["sound"];
+				
+				var obj = JSON.parse(e.data);
+				console.log("Light: " + obj.light);
+				console.log("Sound: " + obj.sound);
+				console.log("Color: " + obj.color);
+				
+				//document.getElementById("status").innerHTML = e.data;
+				
+				
+				//if (e.data != "none" && e.data != "Connected") {
+					//console.log(document.getElementById(e.data).innerHTML);
+					var elems = document.querySelectorAll(".selected");
+					[].forEach.call(elems, function(el) {
+						el.classList.remove("selected");
+					});
+					
+					addClass(document.getElementById(obj.light), "selected");
+					addClass(document.getElementById(obj.sound), "selected");
+					document.getElementById("colorpicker").value = obj.color;
+					
+				//}
+				returnclick();
+			};
+			
+			function sendRGB() {
+				var r = document.getElementById('r').value;
+				var g = document.getElementById('g').value;
+				var b = document.getElementById('b').value;
+								
+				var rgb = '#'+r+g+b;
+				console.log('RGB: ' + rgb);
+				connection.send();
+			}
+			function setRGB() {
+				var r = parseInt(document.getElementById('r').value).toString(16);
+				var g = parseInt(document.getElementById('g').value).toString(16);
+				var b = parseInt(document.getElementById('b').value).toString(16);
+				
+				if(r.length < 2) { r = '0' + r; }
+				if(g.length < 2) { g = '0' + g; }
+				if(b.length < 2) { b = '0' + b; }
+				
+				var rgb = '#'+r+g+b;
+				
+				console.log('RGB: ' + rgb);
+				//document.getElementById("rgbSample").style.backgroundColor = rgb;
+				document.getElementById("colorpicker").value = rgb;
+			}
+			function setRanges(hex) {
+				var rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+				var r = parseInt(rgb[1], 16);
+				var g = parseInt(rgb[2], 16);
+				var b = parseInt(rgb[3], 16);
+				
+				document.getElementById("r").value = r;
+				document.getElementById("g").value = g;
+				document.getElementById("b").value = b;
+				
+			}
+			
+			var y = [];
+			
+			function stopclick() {
+				var x = document.getElementsByClassName("links");
+				var i;
+				for (i = 0; i < x.length; i++) {
+					y[i] = x[i].href;
+					x[i].href = "javascript:void(0);";
+					addClass(x[i], "blocked");
+				}
+			}
+			
+			function returnclick() {
+				var x = document.getElementsByClassName("links");
+				var i;
+				for (i = 0; i < x.length; i++) {
+					x[i].href = y[i];
+					removeClass(x[i], "blocked");
+					document.getElementById("popup").style.display = "none";
+				}
+			}
+			
+			function hasClass(el, className) {
+			  if (el.classList)
+				return el.classList.contains(className);
+			  else
+				return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
+			}
+
+			function addClass(el, className) {
+			  if (el.classList)
+				el.classList.add(className);
+			  else if (!hasClass(el, className)) el.className += " " + className;
+			}
+
+			function removeClass(el, className) {
+			  if (el.classList)
+				el.classList.remove(className);
+			  else if (hasClass(el, className)) {
+				var reg = new RegExp('(\\s|^)' + className + '(\\s|$)');
+				el.className=el.className.replace(reg, ' ');
+			  }
+			}
+			
+			function link(state, status) {
+				stopclick();
+				document.getElementById("status").innerHTML = status;
+				
+				document.getElementById("popup").style.display = "block";
+				if (state == "rgb") {
+					
+					state = document.getElementById("colorpicker").value;
+				}
+				connection.send(state);
+			}
+			
+			var aTags = document.getElementsByClassName("links");
+			for (var i=0;i<aTags.length;i++){
+				aTags.addEventListener("click", function(){
+					//stopclick();
+					//document.getElementById("demo").innerHTML = "Hello World";
+				});
+			}
+
+		</script>
+    </head>
+    <body>
+        <div id="dh1">Cloud9er: <span id="status">{{ messages }}</span></div>
+		<div id="popup">
+			<!--<img src="cloudguy.jpg" />-->
+			Sending...
+			<p>
+				<a class="" href="javascript:returnclick()">Reset</a>
+			</p>
+		</div>
+        <div id="wrapper">
+			<div class="maindiv">
+				<h2>Lighting</h2>
+				<a class="links" href="#" id="lamp" onclick="link(this.id, 'Lamp');">Lamp</a>
+				<a class="links" href="#" id="night" onclick="link(this.id, 'Nightlight');">Night</a>
+				<a class="links" href="#" id="storm" onclick="link(this.id, 'Storming');">Storm</a>
+
+				<h2>Color Picker</h2>
+				<div id="rgbSample" class="rgblinks">
+					<div id="rgbranges">
+						R <input id="r" type="range" min="0" max="255" step="1" value="0" oninput="setRGB();" /><br/>
+						G <input id="g" type="range" min="0" max="255" step="1" value="0" oninput="setRGB();" /><br/>
+						B <input id="b" type="range" min="0" max="255" step="1" value="0" oninput="setRGB();" />
+					</div>
+					<div>
+						<input type="color" id="colorpicker" onchange="setRanges(this.value);" value="#000000" /><br />
+						<a class="links" href="#" id="rgb" onclick="link(this.id, 'RGB');">Set</a>
+					</div>
+				</div>
+				<!--<h2>Brightnesss</h2>
+				<div id="brightnessdiv" class="rgblinks">
+					<div><input id="brightness" type="range" min="0" max="255" step="1" value="0" oninput="document.getElementById('brightValue').value=this.value;" /><br /><span id="brightValue">100%</span></div>
+					<a class="links" href="#" onclick="link('brightness', 'Brightness');">Set</a>
+				</div>-->
+				
+				<a class="links offbutt" href="#" id="lightoff" onclick="link(this.id, 'Off');">Off</a>
+			</div>
+			<div class="maindiv">
+				<h2>Sound</h2>
+				<a class="links" href="#" id="white" onclick="link(this.id, 'Whitenoise');">White</a>
+				<a class="links" href="#" id="brook" onclick="link(this.id, 'Bubbling Brook');">Brook</a>
+				<a class="links" href="#" id="thunder" onclick="link(this.id, 'Storming');">Storm</a>
+				<a class="links offbutt" href="#" id="soundoff" onclick="link(this.id, 'Off');">Off</a>
+			</div>
+		</div>
+    </body>
+</html>
+</html>

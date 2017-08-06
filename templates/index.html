@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Cloud9er</title>
+		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="/favicon.ico" type="image/x-icon">
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<script type="text/javascript" src="script.js">
+		</script>
+    </head>
+	
+    <body>
+        <!--<div id="dh1">Cloud9er <span id="status"></span></div>-->
+        <div id="wrapper">
+			<div class="maindiv">
+				<div class="headbar">
+					
+					<h2>Light</h2>
+				</div>
+				<a class="links" href="#" id="lamp" onclick="link(this.id, 'Lamp');">Lamp</a>
+				<a class="links" href="#" id="glow" onclick="link(this.id, 'Glow');">Glow</a>
+				<a class="links" href="#" id="night" onclick="link(this.id, 'Night Light');">Night</a>
+				<a class="links offbutt" href="#" id="lightoff" onclick="link(this.id, 'Off');">Off</a>
+				<div class="barlines">
+					<div class="sub">
+						<span>Brightness</span> <input id="brightness" type="range" min="0" max="255" step="1" value="0" onclick="sendBrightness();" /><br/>
+					</div>
+				</div>
+				<div class="barlines">
+					<div class="sub">
+						<div id="colorhold" class="links"><span id="clabel" onclick="document.getElementById('colorpicker').click();">Color</span><input type="color" id="colorpicker" onchange="setRanges(this.value);" value="#FFFFFF" /></div>
+						<span>Red</span> <input id="r" type="range" min="0" max="255" step="1" value="0" oninput="setRGB();" onchange="sendRGB();" /><br/>
+						<span>Green</span> <input id="g" type="range" min="0" max="255" step="1" value="0" oninput="setRGB();" onchange="sendRGB();" /><br/>
+						<span>Blue</span> <input id="b" type="range" min="0" max="255" step="1" value="0" oninput="setRGB();" onchange="sendRGB();" />
+					</div>
+						
+				</div>
+				<!--<h2>Brightnesss</h2>
+				<div id="brightnessdiv" class="barlines">
+					<div><input id="brightness" type="range" min="0" max="255" step="1" value="0" oninput="document.getElementById('brightValue').value=this.value;" /><br /><span id="brightValue">100%</span></div>
+					<a class="links" href="#" onclick="link('brightness', 'Brightness');">Set</a>
+				</div>-->
+				
+				</div>
+			<div class="maindiv">
+				<div class="headbar">
+					<h2>Sound</h2>
+				</div>
+				<a class="links" href="#" id="white" onclick="link(this.id, 'Whitenoise');">White</a>
+				<a class="links" href="#" id="brook" onclick="link(this.id, 'Bubbling Brook');">Brook</a>
+				<a class="links" href="#" id="storm" onclick="link(this.id, 'Storm');">Storm</a>
+					<a class="links offbutt" href="#" id="soundoff" onclick="link(this.id, 'Off');">Off</a>
+				<div class="barlines">
+					<div class="sub">
+						<span>Volume</span> <input id="volume" type="range" min="0" max="255" step="1" value="0" onclick="sendVolume();" /><br/>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="shader">
+			<div id="popup">
+				<img src="cloudguy.jpg" />
+				<p>Hold On...</p>
+				<p>
+					<a class="" href="javascript:returnclick()">Reset</a>
+				</p>
+			</div>
+		</div>
+    </body>
+</html>
+</html>
