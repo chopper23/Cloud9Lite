@@ -24,15 +24,12 @@ import tornado.ioloop
 import tornado.options
 import tornado.web
 import tornado.websocket
-from tornado import gen
 import os.path
 import uuid
 import sys
 import pygame as pg
 import os
 import time
-
-import subprocess as sp
 
 from neopixel import *
 from tornado.options import define, options
@@ -46,8 +43,7 @@ brightness = 50
 old_brightness = 50
 volume = 0
 scene = "sceneoff"
-extProc = 0
-music_file = ""
+
 
 # LED strip configuration:
 LED_COUNT      = 60      # Number of LED pixels.
@@ -65,6 +61,7 @@ channels = 2    # 1 is mono, 2 is stereo
 buffer = 2048   # number of samples (experiment to get right sound)
 pg.mixer.init(freq, bitsize, channels, buffer)
 pg.mixer.music.set_volume(1.0)
+
  
  
 
@@ -121,10 +118,6 @@ class CloudSH(tornado.websocket.WebSocketHandler):
             brightness = int(message[1:])
         elif message[0] == "^":
             volume = message[1:]
-            
-            set_volume = float(volume)/float(255)
-            set_volume = "{0:.1f}".format(set_volume)
-            pg.mixer.music.set_volume(float(set_volume))
         elif message == "lamp":
             light = message
             brightness = 255
@@ -143,8 +136,8 @@ class CloudSH(tornado.websocket.WebSocketHandler):
             color = "#FFFFFF"
             scene = message
             brightness = 50
-            volume = 150
-            play_sound("/home/pi/Cloud9Lite/static/0003.mp3")
+            volume = 0.5
+            play_sound("/home/pi/Cloud9Lite/static/ez.mp3")
         elif message == "sceneoff":
             light = "lightoff"
             sound = "soundoff"
@@ -158,16 +151,13 @@ class CloudSH(tornado.websocket.WebSocketHandler):
             color = "#FFFFFF"
         elif message == "white":
             sound = message
-            volume = 150
-            play_sound("/home/pi/Cloud9Lite/static/0001.mp3")
+            volume = 50
         elif message == "brook":
             sound = message
-            volume = 150
-            play_sound("/home/pi/Cloud9Lite/static/0002.mp3")
+            volume = 50
         elif message == "soundoff":
             sound = message
             volume = 0
-            pg.mixer.music.stop()
             
         colorWipe(strip, Color(*hex_to_rgb(color)), brightness)
         
@@ -181,8 +171,7 @@ class CloudSH(tornado.websocket.WebSocketHandler):
 
 def colorWipe(strip, color, brightness, wait_ms=50):
     """Wipe color across display a pixel at a time."""
-    global volume
-    print "Color: ", str(color), "; Brightness: ", brightness, "; Volume: ", volume, ";"
+    print color, brightness
     if old_brightness <> brightness:
         strip.setBrightness(brightness)
         
@@ -197,8 +186,8 @@ def hex_to_rgb(value):
     lv = len(value)
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
-
 def play_sound(music_file):
+    
     try:
         play_music(music_file)
         time.sleep(.25)
@@ -208,8 +197,7 @@ def play_sound(music_file):
         pg.mixer.music.fadeout(1000)
         pg.mixer.music.stop()
         raise SystemExit
-
-@gen.coroutine    
+    
 def play_music(music_file):
     '''
     stream music with mixer.music module in blocking manner
@@ -226,15 +214,15 @@ def play_music(music_file):
         print("File {} not found! {}".format(music_file, pg.get_error()))
         return
  
-    yield pg.mixer.music.play()
+    pg.mixer.music.play()
     
     # If you want to fade in the audio...
     #for x in range(0,volume_set):
     #    pg.mixer.music.set_volume(float(x)/volume_set)
     #    time.sleep(.0075)
     # # check if playback has finished
-    #while pg.mixer.music.get_busy():
-    #   clock.tick(30)    
+    while pg.mixer.music.get_busy():
+        clock.tick(30)
     
 def main():
     tornado.options.parse_command_line()
