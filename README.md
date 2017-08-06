@@ -36,7 +36,7 @@ Setup instructions based on a basically configured Raspbian Jessie Lite:
   sudo nano strandtest.py
   ```
   
-  -Edit any details like number of LEDs or pin number. Save. Run.
+  - Edit any details like number of LEDs or pin number. Save. Run.
   ```
   sudo python strandtest.py
   ```
