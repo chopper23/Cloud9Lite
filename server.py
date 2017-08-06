@@ -138,7 +138,7 @@ class CloudSH(tornado.websocket.WebSocketHandler):
             brightness = 50
             color = "#FFFF33"
         elif message == "storm":
-            light = "lightoff"
+            light = "glow"
             sound = message
             color = "#FFFFFF"
             scene = message
@@ -179,6 +179,7 @@ class CloudSH(tornado.websocket.WebSocketHandler):
         CloudSH.clients.remove(self)
         print("Connection Closed")
 
+@gen.coroutine 
 def colorWipe(strip, color, brightness, wait_ms=50):
     """Wipe color across display a pixel at a time."""
     global volume
@@ -189,7 +190,7 @@ def colorWipe(strip, color, brightness, wait_ms=50):
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
         strip.show()
-        time.sleep(wait_ms/1000.0)
+        yield time.sleep(wait_ms/1000.0)
         
 def hex_to_rgb(value):
     """Return (red, green, blue) for the color given as #rrggbb."""
