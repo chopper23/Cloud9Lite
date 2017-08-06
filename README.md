@@ -36,8 +36,9 @@ Setup instructions based on a basically configured Raspbian Jessie Lite:
   sudo nano strandtest.py
   ```
   
-  - Follow these for audio: https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/overview
   -Edit any details like number of LEDs or pin number. Save. Run.
   ```
   sudo python strandtest.py
   ```
+  - Follow these for audio: https://learn.adafruit.com/adafruit-speaker-bonnet-for-raspberry-pi/overview
+  
