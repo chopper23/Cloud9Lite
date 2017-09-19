@@ -23,7 +23,7 @@
 				<a class="links offbutt" href="#" id="lightoff" onclick="link(this.id, 'Off');">Off</a>
 				<div class="barlines">
 					<div class="sub">
-						<span>Brightness</span> <input id="brightness" type="range" min="0" max="255" step="1" value="0" onclick="sendBrightness();" /><br/>
+						<span>Brightness</span> <input id="brightness" type="range" min="0" max="255" step="1" value="0" onchange="sendBrightness();" /><br/>
 					</div>
 				</div>
 				<div class="barlines">
@@ -52,7 +52,7 @@
 					<a class="links offbutt" href="#" id="soundoff" onclick="link(this.id, 'Off');">Off</a>
 				<div class="barlines">
 					<div class="sub">
-						<span>Volume</span> <input id="volume" type="range" min="0" max="255" step="1" value="0" onclick="sendVolume();" /><br/>
+						<span>Volume</span> <input id="volume" type="range" min="0" max="255" step="1" value="0" onchange="sendVolume();" /><br/>
 					</div>
 				</div>
 			</div>

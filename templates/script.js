@@ -1,6 +1,5 @@
-			var connection = new WebSocket('ws://192.168.1.134:8888/socket/');
-			//var connection = new WebSocket('ws://cwicsite.com:8888/socket/');
-			//var connection = new WebSocket('ws://192.168.43.86:8888/socket/');
+			//var connection = new WebSocket('ws://192.168.1.135:8888/socket/');
+			var connection = new WebSocket('ws://cwicsite.com:8888/socket/');
 			connection.onopen = function () {  
 				connection.send('Connected');
 			};
@@ -82,7 +81,7 @@
 				
 				var rgb = '#'+r+g+b;
 				
-				console.log('Send RGB: ' + rgb);
+				console.log('RGB: ' + rgb);
 				connection.send(document.getElementById("colorpicker").value);
 				document.getElementById("clabel").style.color = invertColor(rgb);
 				document.getElementById("colorhold").style.backgroundColor = rgb;	
@@ -101,14 +100,13 @@
 				
 				var rgb = '#'+r+g+b;
 				
-				console.log('Set RGB: ' + rgb);
+				console.log('RGB: ' + rgb);
 				//document.getElementById("rgbSample").style.backgroundColor = rgb;
 				document.getElementById("colorpicker").value = rgb;		
 				document.getElementById("clabel").style.color = invertColor(rgb);
 				document.getElementById("colorhold").style.backgroundColor = rgb;			
 
 			}
-			
 			function setRanges(hex) {
 				var rgb = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
@@ -120,10 +118,9 @@
 				document.getElementById("g").value = g;
 				document.getElementById("b").value = b;
 				
-				console.log('Ranges RGB: ' + rgb);
 				document.getElementById("clabel").style.color = invertColor(hex);
-				document.getElementById("colorhold").style.backgroundColor = hex;					
-				//connection.send(document.getElementById("colorpicker").value);
+				document.getElementById("colorhold").style.backgroundColor = hex;	
+				
 			}
 			
 			var y = [];

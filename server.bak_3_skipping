@@ -32,9 +32,7 @@ import pygame as pg
 import os
 import time
 import random
-from tornado.process import Subprocess
-import signal
-#from subprocess import PIPE
+import subprocess as sp
 
 from neopixel import *
 from tornado.options import define, options
@@ -51,9 +49,8 @@ scene = "sceneoff"
 extProc = 0
 music_file = ""
 
-
 # LED strip configuration:
-LED_COUNT      = 120      # Number of LED pixels.
+LED_COUNT      = 60      # Number of LED pixels.
 LED_PIN        = 13      # GPIO pin connected to the pixels (18 uses PWM!).
 LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
 LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
@@ -65,10 +62,12 @@ LED_STRIP      = ws.WS2811_STRIP_GRB   # Strip type and colour ordering
 freq = 44100    # audio CD quality
 bitsize = -16   # unsigned 16 bit
 channels = 2    # 1 is mono, 2 is stereo
-buffer = 8192   # number of samples (experiment to get right sound)
-#pg.mixer.init(freq, bitsize, channels, buffer)
-#pg.mixer.music.set_volume(0.0)
+buffer = 2048   # number of samples (experiment to get right sound)
+pg.mixer.init(freq, bitsize, channels, buffer)
+pg.mixer.music.set_volume(1.0)
  
+ 
+
 class Application(tornado.web.Application):
     def __init__(self):
         settings = dict(
@@ -122,7 +121,10 @@ class CloudSH(tornado.websocket.WebSocketHandler):
             brightness = int(message[1:])
         elif message[0] == "^":
             volume = message[1:]
-            setVol(volume)
+            
+            set_volume = float(volume)/float(255)
+            set_volume = "{0:.1f}".format(set_volume)
+            pg.mixer.music.set_volume(float(set_volume))
         elif message == "lamp":
             light = message
             brightness = 255
@@ -142,8 +144,7 @@ class CloudSH(tornado.websocket.WebSocketHandler):
             scene = message
             brightness = 50
             volume = 150
-            play_sound("storm", volume)
-            #play_sound("/home/pi/Cloud9Lite/static/0003.mp3")
+            play_sound("/home/pi/Cloud9Lite/static/0003.mp3")
             randLightning()
         elif message == "sceneoff":
             light = "lightoff"
@@ -159,21 +160,15 @@ class CloudSH(tornado.websocket.WebSocketHandler):
         elif message == "white":
             sound = message
             volume = 150
-            #play_sound("/home/pi/Cloud9Lite/static/0001.mp3")
-            play_sound("white", volume)
+            play_sound("/home/pi/Cloud9Lite/static/0001.mp3")
         elif message == "brook":
             sound = message
             volume = 150
-            #play_sound("/home/pi/Cloud9Lite/static/0002.mp3")
-            play_sound("brook", volume)
+            play_sound("/home/pi/Cloud9Lite/static/0002.mp3")
         elif message == "soundoff":
             sound = message
             volume = 0
-            #pg.mixer.music.stop()
-            global PlayProcess
-            #PlayProcess.kill()
-            os.killpg(os.getpgid(PlayProcess.pid), signal.SIGTERM)
-            
+            pg.mixer.music.stop()
             
         colorWipe(strip, Color(*hex_to_rgb(color)), brightness)
         
@@ -185,6 +180,7 @@ class CloudSH(tornado.websocket.WebSocketHandler):
         CloudSH.clients.remove(self)
         print("Connection Closed")
 
+@gen.coroutine 
 def colorWipe(strip, color, brightness, wait_ms=0):
     """Wipe color across display a pixel at a time."""
     global volume
@@ -195,7 +191,7 @@ def colorWipe(strip, color, brightness, wait_ms=0):
     for i in range(strip.numPixels()):
         strip.setPixelColor(i, color)
         strip.show()
-        time.sleep(wait_ms/1000.0)
+        yield time.sleep(wait_ms/1000.0)
         
 def hex_to_rgb(value):
     """Return (red, green, blue) for the color given as #rrggbb."""
@@ -204,23 +200,26 @@ def hex_to_rgb(value):
     return tuple(int(value[i:i + lv // 3], 16) for i in range(0, lv, lv // 3))
 
 
-def play_sound(music_file, volume):
-    print "Playing..."+music_file
-    global PlayProcess
-    PlayProcess = Subprocess(["python sounder.py " + str(volume) + " " + music_file], stdout=Subprocess.STREAM, stderr=Subprocess.STREAM, shell=True,  preexec_fn=os.setsid)
-    #print process
-    #out, err = yield [process.stdout.read_until_close(), process.stderr.read_until_close()]
-    #print out, err
-    #ret = yield PlayProcess.wait_for_exit()
-    
-    
+def play_sound(music_file):
+    try:
+        play_music(music_file)
+        time.sleep(.25)
+    except NameError:
+        # if user hits Ctrl/C then exit
+        # (works only in console mode)
+        pg.mixer.music.fadeout(1000)
+        pg.mixer.music.stop()
+        raise SystemExit
+
 @gen.coroutine    
 def play_music(music_file):
     '''
     stream music with mixer.music module in blocking manner
     this will stream the sound from disk while playing
     '''
-    global volume  
+    #global volume  
+    #volume_set = volume/255
+    #volume_set = int(volume)
     clock = pg.time.Clock()
     try:
         pg.mixer.music.load(music_file)
@@ -228,7 +227,7 @@ def play_music(music_file):
     except pygame.error:
         print("File {} not found! {}".format(music_file, pg.get_error()))
         return
-    setVol(volume)
+ 
     yield pg.mixer.music.play()
     
     # If you want to fade in the audio...
@@ -239,63 +238,16 @@ def play_music(music_file):
     #while pg.mixer.music.get_busy():
     #   clock.tick(30)    
 
-@gen.coroutine    
+@gen.coroutine      
 def randLightning():
     global sound
-    temp_total_time = 0
     while sound == "storm":
-        #temp_bright = random.randint(1,255)
-        temp_bright = int(255-(255-random.randint(0,255)**(1.5/2.0)))
-        temp_start = random.randint(0,110)
-        temp_stop = random.randint(10,120-temp_start)+temp_start
-        #yield colorWipe(strip, Color(*hex_to_rgb(color)), temp_bright) 
-        colorWipe(strip, Color(0, 0, 0), temp_bright) 
-        yield colorSet(strip, Color(*hex_to_rgb(color)), temp_bright, temp_start, temp_stop) 
-        
-        temp_time = random.randint(0,1000)
-        time.sleep((1000-(1000-temp_time**(1/2.0)))/1000)
-        
-        temp_total_time += temp_time
-        if temp_total_time >= 180000:
-            break
-        
-        #if not pg.mixer.music.get_busy():
-        #    sound == "soundoff"
+        temp_bright = random.randint(1,255)
+        colorWipe(strip, Color(*hex_to_rgb(color)), temp_bright) 
+        yield time.sleep(random.randint(1,5000)/1000)
         #colorWipe(strip, Color(*hex_to_rgb(color)), temp_bright) 
         #yield time.sleep(random.randint(1,1000)/1000)
-
-def colorSet(strip, color, brightness, start, stop, wait_ms=0):
-    """Wipe color across display a pixel at a time."""
-    global volume
-    print "Color: ", str(color), "; Brightness: ", brightness, "; Volume: ", volume, ";"
-    #global old_brightness
-    if old_brightness <> brightness:
-        strip.setBrightness(brightness)
         
-    # for i in range(strip.numPixels()):
-        # if i >= start and i <= stop:
-            # strip.setPixelColor(i, color)
-        # else:
-            # strip.setPixelColor(i, Color(0, 0, 0))
-        # strip.show()
-        # time.sleep(wait_ms/1000.0)        
-    for i in range(start, stop):
-        strip.setPixelColor(i, color)  
-        strip.show()
-        time.sleep(wait_ms/1000.0)
-    for i in range(start, stop):
-        strip.setPixelColor(i, Color(0, 0, 0))
-        strip.show()
-        
-def setVol(volume):
-    set_volume = float(volume)/float(255)
-    #set_volume = "{0:.1f}".format(set_volume)
-    #pg.mixer.music.set_volume(float(set_volume))
-    set_volume = int(set_volume*100)
-    print "Volume..."+str(int(set_volume))
-    process = Subprocess(["amixer -q sset 'PCM' " + str(int(set_volume)) + "%"], stdout=Subprocess.STREAM, stderr=Subprocess.STREAM, shell=True)
-    
-    
 def main():
     tornado.options.parse_command_line()
     app = Application()
