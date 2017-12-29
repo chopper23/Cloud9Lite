@@ -1,8 +1,8 @@
-			var connection = new WebSocket('ws://192.168.1.134:8888/socket/');
+			var connection = new WebSocket('ws://192.168.1.239/socket/');
 			//var connection = new WebSocket('ws://cwicsite.com:8888/socket/');
 			//var connection = new WebSocket('ws://192.168.43.86:8888/socket/');
 			connection.onopen = function () {  
-				connection.send('Connected');
+				sendData('status','Connected');
 			};
 			
 			connection.onerror = function (error) {
@@ -23,6 +23,7 @@
 				// const char* soundState = root["sound"];
 				
 				var obj = JSON.parse(e.data);
+				console.log("Status: " + obj.status);
 				console.log("Light: " + obj.light);
 				console.log("Sound: " + obj.sound);
 				console.log("Color: " + obj.color);
@@ -30,6 +31,9 @@
 				console.log("Volume: " + obj.volume);
 				console.log("Scene: " + obj.scene);
 				
+				if (obj.status == "refresh") {
+					location.reload();
+				}
 				//document.getElementById("status").innerHTML = e.data;
 				
 				
@@ -42,7 +46,6 @@
 					
 					addClass(document.getElementById(obj.light), "selected");
 					addClass(document.getElementById(obj.sound), "selected");
-					//addClass(document.getElementById(obj.scene), "selected");
 					document.getElementById("colorpicker").value = obj.color;
 					setRanges(obj.color);
 					document.getElementById("brightness").value = obj.brightness;
@@ -51,6 +54,17 @@
 				//}
 				returnclick();
 			};
+			
+			function sendData(cmd_val, val_val) {
+				
+				stopclick();
+				
+				var msg = {
+					cmd: cmd_val,
+					val: val_val,
+				};
+				connection.send(JSON.stringify(msg));
+			}
 			
 			function sendBrightness() {
 				stopclick();
@@ -83,7 +97,8 @@
 				var rgb = '#'+r+g+b;
 				
 				console.log('Send RGB: ' + rgb);
-				connection.send(document.getElementById("colorpicker").value);
+				//connection.send(document.getElementById("colorpicker").value);
+				sendData('rgb',document.getElementById("colorpicker").value);
 				document.getElementById("clabel").style.color = invertColor(rgb);
 				document.getElementById("colorhold").style.backgroundColor = rgb;	
 			}
@@ -171,7 +186,7 @@
 			  }
 			} 
 			
-			function link(state, status) {
+			function link(state, value) {
 				stopclick();
 				//document.getElementById("status").innerHTML = status;
 				
@@ -180,7 +195,8 @@
 					
 					state = document.getElementById("colorpicker").value;
 				}
-				connection.send(state);
+				
+				sendData(state,value);
 			}
 			
 			var aTags = document.getElementsByClassName("links");
@@ -224,4 +240,18 @@
 				len = len || 2;
 				var zeros = new Array(len).join('0');
 				return (zeros + str).slice(-len);
-}
+			}
+			
+			function showUpload() {
+				document.getElementById("uploader").style.display = "block";
+			}
+			
+			function hideUpload() {
+				document.getElementById("uploader").style.display = "none";
+			}
+			
+			function delAudio(cmd,val,name) {
+				if (confirm('Are you sure you want to delete this: ' + name)) {
+					sendData(cmd,val);				
+				}
+			}
