@@ -121,6 +121,16 @@ class CloudSH(tornado.websocket.WebSocketHandler):
         msg = json.loads(message)
         
         if msg['cmd'] == "light":
+            if msg['val'] == "next":
+                if light == "lightoff":
+                    msg['val'] = "lamp"
+                elif light == "lamp":
+                    msg['val'] = "glow"
+                elif light == "glow":
+                    msg['val'] = "night"
+                elif light == "night":
+                    msg['val'] = "lightoff"
+        
             if msg['val'] == "lamp":
                 light = msg['val']
                 brightness = 255
