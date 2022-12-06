@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Cloud9er</title>
+		<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+		<link rel="icon" href="/favicon.ico" type="image/x-icon">
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<script type="text/javascript" src="script.js">
+		</script>
+    </head>
+	
+    <body>
+        <!--<div id="dh1">Cloud9er <span id="status"></span></div>-->
+        <div id="wrapper">
+			<div class="maindiv">
+				<div class="headbar">
+					<h2>Light</h2>
+				</div>
+				<a class="links" href="#" id="lamp" onclick="sendData('light', this.id);">Lamp</a>
+				<a class="links" href="#" id="glow" onclick="sendData('light', this.id);">Glow</a>
+				<a class="links" href="#" id="night" onclick="sendData('light', this.id);">Night</a>
+				<a class="links" href="#" id="rainbow" onclick="sendData('light', this.id);">Rainbow</a>
+				<a class="links" href="#" id="chase" onclick="sendData('light', this.id);">Chase</a>
+				<a class="links offbutt" href="#" id="lightoff" onclick="sendData('light', this.id);">Off</a>
+				<div class="barlines">
+					<div class="sub">
+						<span>Brightness</span> <input id="brightness" type="range" min="0" max="255" step="1" value="0" onchange="sendData('brightness', this.value);" /><br/>
+					</div>
+				</div>
+				<div class="barlines">
+					<div class="sub">
+						<div id="colorhold" class="links"><span id="clabel" onclick="document.getElementById('colorpicker').click();">Color</span><input type="color" id="colorpicker" value="#FFFFFF" /></div>
+						<span>Red</span> <input id="r" type="range" min="0" max="255" step="1" value="0" oninput="setRGB();" onchange="sendRGB();" /><br/>
+						<span>Green</span> <input id="g" type="range" min="0" max="255" step="1" value="0" oninput="setRGB();" onchange="sendRGB();" /><br/>
+						<span>Blue</span> <input id="b" type="range" min="0" max="255" step="1" value="0" oninput="setRGB();" onchange="sendRGB();" />
+					</div>
+				</div>
+			</div>
+			<div class="maindiv">
+				<div class="headbar">
+					<a href="" class="links offbutt" onclick="showUpload(); return false;">&nbsp;<img src="static/gear.png" height="50px" />&nbsp;</a>
+					<h2>Sound</h2>
+				</div>
+				
+				{% for item in audio_list %}
+					<a class="links" href="#" id="{{ escape(item) }}" onclick="sendData('audio', this.id);">{{ escape(audio_list[item][1]) }}</a>
+				{% end %}
+				<div class="headbar">
+					<h2>Scene</h2>
+				</div>
+					<a class="links" href="#" id="storm" onclick="sendData('scene', this.id);">Storm</a>
+					<a class="links offbutt" href="#" id="soundoff" onclick="sendData('audio', this.id);">Off</a>
+				<div class="barlines">
+					<div class="sub">
+						<span>Volume</span> <input id="volume" type="range" min="0" max="255" step="1" value="0" onchange="sendData('volume', this.value);" /><br/>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="shader">
+			<div id="popup">
+				<h3>Cloud9Lite</h3>
+				<img src="cloudguy.jpg" />
+				<p>Hold On...</p>
+				<p>
+					<a class="" href="javascript:returnclick()">Reset</a>
+				</p>
+			</div>
+		</div>
+		<div id="uploader">
+			<div id="upup">
+				<form enctype="multipart/form-data" action="/upload" method="post" name="upform" onsubmit="return validateForm()" >
+					{% module xsrf_form_html() %}
+					Name: <input class="links2" type="text" name="name" size="8" />
+					File: <input class="links2" type="file" name="filearg" />
+					<br />
+					<input class="links2" type="submit" value="Upload" />
+					<br />
+					<button class="links2" onclick="hideUpload(); return false;">Cancel</button>
+				</form>
+				<hr />
+				Remove Files:
+				{% for item in audio_list %}
+					<li>{{ escape(audio_list[item][1]) }} <a href="#" id="{{ escape(item) }}" style="float: right;" onclick="delAudio('removeAudio',this.id, '{{ escape(audio_list[item][1]) }}');">[X]</a></li>
+				{% end %}
+			</div>
+		</div>
+    </body>
+</html>
+</html>
